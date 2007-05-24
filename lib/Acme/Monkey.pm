@@ -9,6 +9,10 @@ Acme::Monkey - Monkeys here, monkeys there, MONKEYS everywhere!
   use Acme::Monkey;
   
   my $conway = Acme::Monkey->new();
+  my $wall   = Acme::Monkey->new();
+  
+  $wall->groom( $conway );
+  $conway->dump();
 
 I so ponys, I so ponys.
 
