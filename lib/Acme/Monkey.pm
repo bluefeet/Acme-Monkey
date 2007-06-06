@@ -22,9 +22,19 @@ I so ponys, I so ponys.
 
 use strict;
 use warnings;
+use Time::HiRes qw(usleep);
+use File::Find;
 
-$SIG{__WARN__} = sub{ print STDERR "grrrr\n"; }
-$SIG{__DIE__}  = sub{ print STDERR shift()."! eeek eeek!\n"; exit 1; }
+$SIG{__WARN__} = sub{ print STDERR "grrrr\n"; };
+$SIG{__DIE__}  = sub{ print STDERR shift()."! eeek eeek!\n"; exit 1; };
+
+# Need...all other platforms
+our %os_clrscr_commands = (
+    'linux'   => 'clear',
+    'MSWin32' => 'cls',
+);
+
+our $CLEAR_COMMAND = $os_clrscr_commands{$^O};
 
 =head1 METHODS
 
@@ -52,17 +62,20 @@ sub monkey {
 Add some useful features to any object.
 
 =cut
+#sub bastardize {
+#    $self    =      splice(     @_,   0   ,1    );
+#    {  #      Retrieve arguments    of  parameter.
+#    no          strict;   $object    =       shift
+#    ;my      @classes   =         $_[     0 ]    ;
+#    $class=$classes->[1     -             1    ] ;
+#    }     #Then    finsh  for        more   stuff.
+#    no strict 'refs';*{$class.'::monkey' }=\$self;
+#    *{ $class . '::DESTROY' } = sub{$monkey->slap}
+#    ;  return 'SUPERCALIFRAJULISTICEXPIALIDOTIOUS'
+#}
 
 sub bastardize {
-    $self    =      splice(     @_,   0   ,1    );
-    {  #      Retrieve arguments    of  parameter.
-    no          strict;   $object    =       shift
-    ;my      @classes   =         $_[     0 ]    ;
-    $class=$classes->[1     -             1    ] ;
-    }     #Then    finsh  for        more   stuff.
-    no strict 'refs';*{$class.'::monkey' }=\$self;
-    *{ $class . '::DESTROY' } = sub{$monkey->slap}
-    ;  return 'SUPERCALIFRAJULISTICEXPIALIDOTIOUS'
+    return 'SUPERCALIFRAJULISTICEXPIALIDOTIOUS'
 }
 
 =head2 slap
@@ -85,8 +98,83 @@ sub _happyness {
     die('cry') if $_[0]->{happyness} <1;
 }
 
+
+
+
+sub _hologram {
+    print '  _   ######   _'."\n";
+    print ' / \ #(*)(*)# / \\'."\n";
+    print ' | {<#/ {} \#>} |'."\n";          
+    print ' \_/#|      |#\_/'."\n";
+    print '    #\======/#'."\n";
+    print '     ########'."\n";          
+    print '       ####'."\n";
+}
+
+=head2 swing
+
+    $monkey->swing("/bin"); # Well, it sounds like vine. :)
+
+    $monkey->swing(qw(/bin /var));
+
+Monkey seeks out bananas in given directory trees.
+
+=cut
+
+sub swing {
+    my $self            = shift;
+    my @directory_trees = @_;
+
+    our @bunch_o_nanas;
+
+    $self->_hologram();
+    print "\nSearching for bananas...\n\n";
+    find(\&while_im_swinging_in, @directory_trees);
+
+    # Bananas call back. Bananas find Monkey...
+    sub while_im_swinging_in {
+        if ($File::Find::name =~ m/.*banana.*/i) {
+            push @bunch_o_nanas, $File::Find::dir.$File::Find::name;
+        }
+    }
+
+    # Report on my swinging
+    if (@bunch_o_nanas) {
+        print "NO, we found bananas at...\n";
+        print join("\n", @bunch_o_nanas);
+        print "\n";
+    }
+    else {
+        print "YES, we have no bananas.\n";
+        print "How about dropping some!\n";
+    }    
+}
+
+=head2 fling
+
+A verb.
+
+    $monkey->fling();
+
+=cut
+
+sub fling {
+    my $fling_buffer = Acme::Monkey::FrameBuffer->new(W => 40, H => 10);
+
+    system($CLEAR_COMMAND);
+    for my $seq(@{$Acme::Monkey::FlingFrames::sequence}) {
+        system($CLEAR_COMMAND);
+        $fling_buffer->clear();
+        $fling_buffer->put(@{$Acme::Monkey::FlingFrames::frames}[$seq], 2, 2);
+        $fling_buffer->put([__PACKAGE__], 1, 1);
+        $fling_buffer->draw();
+        usleep(120000);
+    }
+}
+
+
 use Exporter qw( import );
-our @EXPORT = qw( grrrr bannana grubs wine beer vodka );
+our @EXPORT = qw(grrrr bannana grubs wine beer vodka swing fling);
 
 =head1 SUBROUTINES
 
@@ -112,13 +200,199 @@ sub wine    { return 'drunk', 2; }
 sub beer    { return 'drunk', 1; }
 sub vodka   { return 'drunk', 5; }
 
+# Hmmm, Appears to be a Java inner class :)
+{
+    package Acme::Monkey::FrameBuffer;
+
+    use Carp qw(croak);
+
+    # TODO: put all OO boilerplate...
+
+    sub new {
+	    my $class  = shift;
+	    my %params = @_;
+	    my $self   = {};
+	
+	    $self->{WIDTH}  = $params{'width'}  || $params{'W'} || undef;
+	    $self->{HEIGHT} = $params{'height'} || $params{'H'} || undef;
+
+        # TODO: Should we just default X,Y instead?
+	    croak "Width required\n"  if !defined($self->{WIDTH});
+	    croak "Height required\n" if !defined($self->{HEIGHT});
+
+	    $self->{BUF_SIZE} = $self->{WIDTH} * $self->{HEIGHT};
+	    $self->{BUFFER}   = '';
+
+	    bless($self, $class);
+    }
+
+    sub width {
+	    my ($self) = shift;
+	    return $self->{WIDTH};
+    }
+
+    sub height {
+	    my ($self) = shift;
+	    return $self->{HEIGHT};
+    }
+
+    sub get_buffer {
+	    my $self = shift;
+	    return $self->{BUFFER};
+    }
+
+    sub clear {
+	    my $self = shift;
+	    $self->{BUFFER} = ' ' x $self->{BUF_SIZE};
+    }
+
+    sub put {
+	    my $self = shift;
+	    my ($what, $xcoord, $ycoord) = @_;
+
+	    $xcoord -= 1; 
+	    $ycoord -= 1;
+	
+	    my $location = ($ycoord * $self->{WIDTH}) + $xcoord;
+	
+	    for my $line(@$what) {
+		    substr($self->{BUFFER}, $location, length($line), $line);
+		    $location += $self->{WIDTH};
+	    }
+    }
+
+    sub draw {
+	    my $self = shift;
+
+	    for my $row(0..($self->{HEIGHT}-1)) {
+		    my $line = substr($self->{BUFFER}, $row * $self->{WIDTH}, $self->{WIDTH});
+		    print "$line\n";
+	    }
+    }
+
+    !(!(!0));
+}
+
+{
+    package Acme::Monkey::FlingFrames;
+
+    use strict;
+    use warnings;
+
+    BEGIN {
+        use Exporter();
+        our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
+        $VERSION   = 0.01;
+        @ISA       = qw(Exporter);
+        @EXPORT_OK = qw($sequence $frames);
+    }
+    our @EXPORT_OK;
+
+    our $sequence = [0,0,0,1,2,3,2,1,4,5,6,7,8,9];
+
+    our $frames = [
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----',
+		'    |    ',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----*',
+		'    |    ',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '         * ',
+		'   o@o  / ',
+		'----|--- ',
+		'    |    ',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '        * ',
+		'   o@o  | ',
+		'----|--- ',
+		'    |    ',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----  *',
+		'    |    ',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----     *',
+		'    |    ',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----',
+		'    |              *',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----',
+		'    |                  *',
+		'   ===   ',
+		'  |   |  ',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----',
+		'    |    ',
+		'   ===                      *',
+		'  |   |  ',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----',
+		'    |    ',
+		'   ===   ',
+		'  |   |                          *',
+	],
+    [
+	    '         ',
+		'   o@o   ',
+		'----|----',
+		'    |    ',
+		'   ===   ',
+		'  |   |                          *',
+    ],
+];
+
+    !(!(!0));
+}
 
 1;
+
 __END__
 
 =head1 AUTHORS
 
 Aran Deltac (L<adeltac@valueclick.com>)
+
+Todd Presta (L<tpresta@valueclick.com>)
 
 =head1 LICENSE
 
