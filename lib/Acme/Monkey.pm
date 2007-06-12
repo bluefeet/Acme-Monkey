@@ -25,8 +25,8 @@ use warnings;
 use Time::HiRes qw(usleep);
 use File::Find;
 
-$SIG{__WARN__} = sub{ print STDERR "grrrr\n"; };
-$SIG{__DIE__}  = sub{ print STDERR shift()."! eeek eeek!\n"; exit 1; };
+#$SIG{__WARN__} = sub{ print STDERR "grrrr\n"; };
+#$SIG{__DIE__}  = sub{ print STDERR shift()."! eeek eeek!\n"; exit 1; };
 
 # Need...all other platforms
 our %os_clrscr_commands = (
@@ -382,6 +382,76 @@ sub vodka   { return 'drunk', 5; }
 ];
 
     !(!(!0));
+}
+
+{
+    package Acme::Monkey::ScreenBuffer;
+
+    sub new {
+        my ($class, $width, $height) = @_;
+        my $self = bless {}, $class;
+        $self->{width}  = $width;
+        $self->{height} = $height;
+        $self->clear_screen();
+        $self->clear_buffer();
+        return $self;
+    }
+
+    sub clear_screen {
+        system( $CLEAR_COMMAND );
+    }
+
+    sub put {
+        my ($self, $x, $y, $char) = @_;
+        $self->{buffer}->[$x]->[$y] = $char;
+        
+    }
+
+    sub get {
+        my ($self, $x, $y) = @_;
+        return $self->{buffer}->[$x]->[$y];
+    }
+
+    sub display {
+        my ($self) = @_;
+
+        my $out = '';
+        foreach my $y (1..$self->{height}) {
+            foreach my $x (1..$self->{width}) {
+                $out .= $self->{buffer}->[$x]->[$y];
+            }
+            $out .= "\n";
+        }
+        $self->clear_screen();
+        print $out;
+    }
+
+    sub flush {
+        my ($self) = @_;
+        $self->display();
+        $self->clear_buffer();
+    }
+
+    sub clear_buffer {
+        my ($self) = @_;
+        my $buffer = [];
+        foreach my $x (1..$self->{width}) {
+            $buffer->[$x] = [];
+            foreach my $y (1..$self->{height}) {
+                $buffer->[$x]->[$y] = ' ';
+            }
+        }
+        $self->{buffer} = $buffer;
+    }
+
+    sub scroll_left {
+        my ($self) = @_;
+        foreach my $x (2..$self->{width}) {
+            foreach my $y (1..$self->{height}) {
+                $self->{buffer}->[$x-1]->[$y] = $self->{buffer}->[$x]->[$y];
+            }
+        }
+    }
 }
 
 1;
