@@ -48,6 +48,7 @@ sub new {
     $self->{hunger}    = 80;
     $self->{happiness} = 50;
     $self->{drunkness} = 0;
+    $self->{sub}       = undef;
     return $self;
 }
 
@@ -86,19 +87,66 @@ Poor monkey...
 
 sub slap {
     grrrr('Ouch!');
-    $_[0]->_happyness( -1 );
+    $_[0]->_happiness( -1 );
 }
 
 sub fondle {
     die('pervert');
 }
 
-sub _happyness {
-    $_[0]->{happyness} -= $_[1];
-    die('cry') if $_[0]->{happyness} <1;
+sub _happiness {
+    $_[0]->{happiness} += $_[1];
+    die('cry') if $_[0]->{happiness} <1;
 }
 
+sub groom {
+    my $self   = shift;
+    my $target = shift;
+    if (ref($target) eq 'Acme::Monkey') {
+        $target->_happiness(+1);
+    }
+    else {
+        die "Target is not a monkey!\n";
+    }
+}
 
+sub dump {
+    my $self = shift;
+    use Data::Dumper;
+    print Dumper($self);
+    return;
+}
+
+=head2 see
+
+Allows the monkey to see a function. See do
+
+sub shoot {
+    print "Bang!\n";
+}
+$monkey = Acme::Monkey->new();
+$monkey->see(\&shoot);
+$monkey->do();
+$monkey->do();
+
+=cut
+
+sub see {
+    my $self = shift;
+    my $sub  = shift;
+    $self->{sub} = $sub;
+}
+
+=head2 do
+
+Does what the monkey see()s
+
+=cut
+
+sub do {
+    my $self = shift;
+    return $self->{sub}->() if defined $self->{sub};
+}
 
 
 sub _hologram {
@@ -193,9 +241,9 @@ Exporter is used to these on you.
 
 =cut
 
-sub grrrr { print STDERR join(' grrr ',@_)." GRRRR\n"; }
-sub bannana { return 'food', 1; }
-sub grubs   { return 'food', 2; }
+sub grrrr   { print STDERR join(' grrr ',@_)." GRRRR\n"; }
+sub banana  { return 'food',  1; }
+sub grubs   { return 'food',  2; }
 sub wine    { return 'drunk', 2; }
 sub beer    { return 'drunk', 1; }
 sub vodka   { return 'drunk', 5; }
@@ -464,6 +512,8 @@ Aran Deltac (L<adeltac@valueclick.com>)
 
 Todd Presta (L<tpresta@valueclick.com>)
 
+Mayukh Bose (L<mbose@valueclick.com>)
+
 =head1 LICENSE
 
 You may distribute this code under the same terms as Perl itself.
@@ -495,3 +545,4 @@ LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE SOFTWARE TO
 OPERATE WITH ANY OTHER SOFTWARE), EVEN IF SUCH HOLDER OR OTHER PARTY HAS
 BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
+=cut
