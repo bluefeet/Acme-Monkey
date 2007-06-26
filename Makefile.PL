@@ -14,9 +14,9 @@ WriteMakefile(
         'Term::Screen' => 0,
         'Moose' => 0,
     },
-#    EXE_FILES => [
-#        'bin/monkey_ship.pl',
-#        'bin/monkey_life.pl',
-#    ],
+    EXE_FILES => [
+        'bin/monkey_ship.pl',
+        'bin/monkey_life.pl',
+    ],
 );
 

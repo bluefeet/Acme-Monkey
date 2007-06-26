@@ -18,6 +18,17 @@ I so ponys, I so ponys.
 
 =head1 DESCRIPTION
 
+This module is a collaborative effort of several ValueClick Media
+employees.  We developed this module to coincide with the
+YAPC::NA 2007 conference in Houston, TX.  In the conference SWAG
+bag we distributed about 275 monkey balls with the ValueClick logo
+and a reference to this module.
+
+This module is better than sliced gravy.
+
+Make sure you check out the supporting scripts - monkey_life.pl
+and monkey_ship.pl.
+
 =cut
 
 use strict;
@@ -28,7 +39,7 @@ use File::Find;
 $SIG{__WARN__} = sub{ print STDERR "grrrr\n"; };
 $SIG{__DIE__}  = sub{ print STDERR shift()."! eeek eeek!\n"; exit 1; };
 
-our $VERSION = 4.98;
+our $VERSION = 4.99;
 
 # Need...all other platforms
 our %os_clrscr_commands = (
