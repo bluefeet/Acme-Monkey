@@ -3,6 +3,8 @@ package Acme::Monkey::Frame;
 use Moose;
 
 use Acme::Monkey::ClearScreen;
+use Term::Screen;
+use Term::ANSIColor qw(:constants);
 
 extends 'Acme::Monkey::ClearScreen';
 
@@ -11,36 +13,38 @@ has 'height'  => (is=>'rw', isa=>'Int', required=>1);
 
 has 'layers' => (is=>'rw', isa=>'HashRef', default=>sub{ {} });
 
-sub add_layer {
-    my ($self, $key, $layer) = @_;
-
-    $self->layers->{$key} = $layer;
-}
-
 sub draw {
     my ($self) = @_;
 
-    $self->clear_screen();
     my @layers = map { $self->layers->{$_} } sort keys( %{ $self->layers() } );
+    my $content = '';
 
     foreach my $y (1..$self->height()) {
-        my $line = '';
         foreach my $x (1..$self->width()) {
             my $char;
+            my $color;
             foreach my $layer (@layers) {
                 $char = $layer->get(
                     $x - $layer->x() + 1,
                     $y - $layer->y() + 1,
                 );
                 if ($char) {
+                    $color = $layer->color();
                     last;
                 }
             }
-            $char ||= ' ';
-            $line .= $char;
+            if ($char) {
+                $content .= $color.$char.RESET;
+            }
+            else {
+                $content .= ' ';
+            }
         }
-        print "$line\n";
+        $content .= "\n";
     }
+
+    $self->clear_screen();
+    print $content;
 }
 
 1;
