@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use strict;
 use warnings;
 
@@ -122,6 +123,8 @@ foreach (1..1000) {
         print "\n\nYOU WON!!!\n";
         last;
     }
+
+    print "\nw = Up.  s = Down.  a = Left.  d = Right.\n<space> = Shoot.\nx = Exit.";
 
     sleep .2;
 }

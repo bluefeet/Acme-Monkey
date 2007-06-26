@@ -25,8 +25,10 @@ use warnings;
 use Time::HiRes qw(usleep);
 use File::Find;
 
-#$SIG{__WARN__} = sub{ print STDERR "grrrr\n"; };
-#$SIG{__DIE__}  = sub{ print STDERR shift()."! eeek eeek!\n"; exit 1; };
+$SIG{__WARN__} = sub{ print STDERR "grrrr\n"; };
+$SIG{__DIE__}  = sub{ print STDERR shift()."! eeek eeek!\n"; exit 1; };
+
+our $VERSION = 4.98;
 
 # Need...all other platforms
 our %os_clrscr_commands = (

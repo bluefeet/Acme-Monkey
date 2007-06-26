@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use strict;
 use warnings;
 
@@ -195,6 +196,9 @@ foreach (1..1000) {
     add_food();
 
     $frame->draw();
+
+    print "\nc = Create new monkey baby.\nf = Create some bannanas to eat.\nx = Exit.";
+
     sleep 1;
 }
 
