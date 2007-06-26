@@ -132,3 +132,14 @@ foreach (1..1000) {
 };
 ReadMode 0;
 
+__END__
+
+=head1 NAME
+
+monkey_ship.pl - Guide the intergallectic spaceship of the first confederate force of monkey citizens of the congo and brazillian rainforests.
+
+=head1 DESCRIPTION
+
+Using your masterful piloting skills guide the monkey-ship on 
+a mission to destroy the giant <= ship.
+

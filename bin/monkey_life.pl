@@ -207,115 +207,21 @@ ReadMode 0;
 
 __END__
 
-foreach (1..int( ($background->width() * $background->height()) / 8 )) {
-    my $x = (int( rand() * $background->width() ) * 2) + 1;
-    my $y = int( rand() * $background->height() ) + 1;
-    my $char = ($background->get($x, $y)) ? 'o' : '.';
-    $background->set( $x, $y, $char );
-}
+=head1 NAME
 
-$frame->layers->{z} = $background;
+monkey_life.pl - Be a monkey god.
 
-my $ship = Acme::Monkey::Frame::Layer->new(
-    x => 2,
-    y => 4,
-    width  => 4,
-    height => 3,
-    color  => BOLD.CYAN,
-);
-$ship->set(
-    1, 1,
-    join("\n",
-        "-\\",
-        "=@>",
-        "-/",
-    )
-);
-$frame->layers->{a} = $ship;
+=head1 SYNOPSIS
 
-my $enemy = Acme::Monkey::Frame::Layer->new(
-    x => $frame->width()-3,
-    y => int( $frame->height() / 2 ),
-    width  => 2,
-    height => 1,
-    color  => BOLD.GREEN,
-);
-$enemy->set( 1, 1, '<=' );
-$frame->layers->{b} = $enemy;
+  monkey_life.pl
 
-my $laser = Acme::Monkey::Frame::Layer->new(
-    width  => 2,
-    height => 1,
-    hidden => 1,
-    color  => BOLD.RED,
-);
-$laser->set( 1, 1, '--' );
-$frame->layers->{c} = $laser;
+=head1 DESCRIPTION
 
-my $boom = Acme::Monkey::Frame::Layer->new(
-    width  => 6,
-    height => 3,
-    hidden => 1,
-    color  => BOLD.RED.BLINK,
-);
-$boom->set( 1, 1, "\t\\\t\t/\n-BOOM-\n\t/\t\t\\" );
-$frame->layers->{d} = $boom;
+When you first start this script you will be shown a top down view of
+a lush rainforest.   In it will be the occasional bannana.
 
-$frame->draw();
+It is silent and eerie until the creator (you) decides to start life.
 
-ReadMode 4;
-eval {
-
-    my $key = ReadKey( -1 ) || '';
-
-    last if ($key =~ /[xq]/);
-
-    $ship->move_up() if ($key eq 'w');
-    $ship->move_down() if ($key eq 's');
-    $ship->move_left() if ($key eq 'a');
-    $ship->move_right() if ($key eq 'd');
-
-    if (rand() < .5) {
-        $enemy->move_up() if ($enemy->y() > 1);
-    }
-    else {
-        $enemy->move_down() if ($enemy->y() < $frame->height());
-    }
-
-    if ($key eq ' ') {
-        if ($laser->hidden()) {
-            $laser->hidden( 0 );
-            $laser->x( $ship->x() );
-            $laser->y( $ship->y() + 1 );
-        }
-    }
-
-    if (!$laser->hidden()) {
-        $laser->move_right( 2 );
-        if ($laser->x() > $frame->width()) {
-            $laser->hidden( 1 );
-        }
-        if ($laser->y() == $enemy->y() and $laser->x() >= $enemy->x()-1) {
-            $laser->hidden( 1 );
-            $enemy->hidden( 1 );
-            $boom->y( $enemy->y() - 1 );
-            $boom->x( $enemy->x() - 2 );
-            $boom->hidden( 0 );
-        }
-    }
-
-    $background->move_left();
-foreach (1..1000) {
-    $frame->draw();
-
-    if (!$boom->hidden()) {
-        print "\n\nYOU WON!!!\n";
-        last;
-    }
-
-    sleep .2;
-}
-
-};
-ReadMode 0;
+Make sure you feed your little primates, for they will die fast without
+food and will not mate unless they are well fed.
 
