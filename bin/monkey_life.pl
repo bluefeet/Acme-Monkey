@@ -2,6 +2,36 @@
 use strict;
 use warnings;
 
+use Time::HiRes qw( sleep );
+use Term::ReadKey;
+use Term::Animation;
+
+my $anim = Term::Animation->new();
+
+print 'set bg';
+$anim->background( 'blue' );
+print 'done set bg';
+
+print 'green is valid' if $anim->is_valid_color('green');
+
+$anim->new_entity(
+    shape => 'HIIIII',
+    position => [3, 6, 2],
+    color => 'bBbBbB',
+);
+
+while (1) {
+    
+
+    $anim->animate();
+    sleep 1;
+    last;
+}
+
+$anim->end();
+
+__END__
+
 use Acme::Monkey::Frame;
 use Acme::Monkey::Frame::Layer;
 use Term::ANSIColor qw( :constants );
@@ -68,7 +98,7 @@ sub create_monkey {
     $monkeys{$monkey_id} = {
         layer  => $layer,
 #        hunger => int(rand() * 20) + 1,
-        hunger => 0,
+        hunger => 30,
         age    => $age,
         last_move => 0,
     };
@@ -108,6 +138,11 @@ foreach (1..1000) {
         );
     }
     elsif ($key eq 'f') {
+        add_food();
+        add_food();
+        add_food();
+        add_food();
+        add_food();
         add_food();
         add_food();
         add_food();
@@ -193,6 +228,7 @@ foreach (1..1000) {
         $monkey->{last_move} = $move;
     }
 
+    add_food();
     add_food();
 
     $frame->draw();
